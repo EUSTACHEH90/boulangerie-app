@@ -1,0 +1,200 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProductCategory {
+  BOULANGERIE    // Pain, baguette, etc.
+  VIENNOISERIE   // Croissant, pain au chocolat, etc.
+  PATISSERIE     // Gâteaux, tartes, etc.
+}
+
+enum ProductStatus {
+  AVAILABLE      // Disponible à la vente
+  OUT_OF_STOCK   // Rupture de stock
+  ARCHIVED       // Produit archivé (ne s'affiche plus)
+}
+
+enum OrderStatus {
+  PENDING        // En attente de paiement
+  CONFIRMED      // Confirmée (paiement validé)
+  PREPARING      // En préparation
+  READY          // Prête pour récupération/livraison
+  COMPLETED      // Terminée
+  CANCELLED      // Annulée
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY   // Orange Money, Moov Money, etc.
+  CASH           // Paiement en espèces
+  CARD           // Carte bancaire (futur)
+}
+
+enum PaymentStatus {
+  PENDING        // En attente
+  PROCESSING     // En cours de traitement
+  COMPLETED      // Paiement réussi
+  FAILED         // Échec du paiement
+  REFUNDED       // Remboursé
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model Admin {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  password      String    // Hash bcrypt
+  firstName     String    @map("first_name")
+  lastName      String    @map("last_name")
+  role          UserRole  @default(ADMIN)
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Product {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String          @unique // URL-friendly (ex: croissant-beurre)
+  description String?         @db.Text
+  category    ProductCategory
+  status      ProductStatus   @default(AVAILABLE)
+  price       Decimal         @db.Decimal(10, 2) // Prix en FCFA
+  image       String?         // URL de l'image principale
+  images      String[]        @default([]) // Galerie d'images supplémentaires
+  weight      Int?            // Poids en grammes (optionnel)
+  isAvailable Boolean         @default(true) @map("is_available") // Disponibilité quotidienne
+  stock       Int?            // Quantité en stock (null = stock illimité)
+  
+  // SEO
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description")
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  orderItems  OrderItem[]
+
+  @@index([category])
+  @@index([status])
+  @@index([slug])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  orderNumber     String      @unique @map("order_number") // Numéro de commande (ex: ORD-20250131-001)
+  status          OrderStatus @default(PENDING)
+  
+  // Informations client
+  customerName    String      @map("customer_name")
+  customerEmail   String?     @map("customer_email")
+  customerPhone   String      @map("customer_phone")
+  
+  // Montants
+  subtotal        Decimal     @db.Decimal(10, 2) // Sous-total
+  deliveryFee     Decimal     @default(0) @db.Decimal(10, 2) @map("delivery_fee") // Frais de livraison
+  total           Decimal     @db.Decimal(10, 2) // Total final
+  
+  // Livraison / Récupération
+  isDelivery      Boolean     @default(false) @map("is_delivery") // true = livraison, false = retrait
+  deliveryAddress String?     @db.Text @map("delivery_address")
+  deliveryTime    DateTime?   @map("delivery_time") // Heure souhaitée
+  
+  // Notes
+  notes           String?     @db.Text // Notes du client
+  adminNotes      String?     @db.Text @map("admin_notes") // Notes internes admin
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  completedAt     DateTime?   @map("completed_at")
+  cancelledAt     DateTime?   @map("cancelled_at")
+
+  // Relations
+  items           OrderItem[]
+  payment         Payment?
+
+  @@index([orderNumber])
+  @@index([status])
+  @@index([customerPhone])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @map("order_id") @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  
+  // Snapshot du produit au moment de la commande
+  productName String   @map("product_name")
+  price       Decimal  @db.Decimal(10, 2) // Prix unitaire au moment de l'achat
+  quantity    Int
+  subtotal    Decimal  @db.Decimal(10, 2) // price * quantity
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  orderId           String        @unique @map("order_id") @db.Uuid
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  
+  // Montant
+  amount            Decimal       @db.Decimal(10, 2)
+  
+  // Mobile Money spécifique
+  phoneNumber       String?       @map("phone_number") // Numéro du payeur
+  operator          String?       // Orange, Moov, etc.
+  transactionId     String?       @unique @map("transaction_id") // ID transaction externe
+  transactionRef    String?       @map("transaction_ref") // Référence interne
+  
+  // Métadonnées
+  metadata          Json?         // Données supplémentaires (réponse API, etc.)
+  failureReason     String?       @db.Text @map("failure_reason")
+  
+  // Timestamps
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  completedAt       DateTime?     @map("completed_at")
+
+  // Relations
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@index([status])
+  @@map("payments")
+}
