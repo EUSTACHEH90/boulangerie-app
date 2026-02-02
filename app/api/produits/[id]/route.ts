@@ -6,15 +6,16 @@ import { updateProductSchema } from '@/lib/validations/product'
 import { requireAuth } from '@/lib/auth-middleware'
 import { ZodError } from 'zod'
 
-/**
- * GET /api/produits/[id]
- */
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const product = await ProductService.getById(params.id)
+    const { id } = await context.params
+    const product = await ProductService.getById(id)
 
     return NextResponse.json({
       success: true,
@@ -46,10 +47,10 @@ export async function GET(
  * PUT /api/produits/[id]
  */
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest, context: RouteContext
 ) {
   try {
+    const { id } = await context.params
     const authResult = await requireAuth(request)
     if (authResult.error) return authResult.response
 
@@ -80,7 +81,7 @@ export async function PUT(
       )
     }
 
-    const product = await ProductService.update(params.id, validatedData)
+    const product = await ProductService.update(id, validatedData)
 
     return NextResponse.json({
       success: true,
@@ -137,16 +138,16 @@ export async function PUT(
  * DELETE /api/produits/[id]
  */
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest, context: RouteContext
 ) {
   try {
+    const { id } = await context.params
     const authResult = await requireAuth(request)
     if (authResult.error) return authResult.response
 
     const admin = authResult.admin
 
-    await ProductService.delete(params.id)
+    await ProductService.delete(id)
 
     return NextResponse.json({
       success: true,

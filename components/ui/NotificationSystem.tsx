@@ -1,8 +1,8 @@
 // src/components/ui/NotificationSystem.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CheckCircle, Info, AlertCircle, X, Bell } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { CheckCircle, Info, AlertCircle, X } from 'lucide-react'
 
 interface Notification {
   id: string
@@ -19,63 +19,51 @@ interface NotificationSystemProps {
 export default function NotificationSystem({ orderId }: NotificationSystemProps) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [lastStatus, setLastStatus] = useState<string | null>(null)
-  const [hasPermission, setHasPermission] = useState(false)
+  
+  // ✅ Initialiser avec une fonction au lieu de useEffect
+  const [hasPermission, setHasPermission] = useState(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission === 'granted'
+    }
+    return false
+  })
 
-  // Demander la permission pour les notifications navigateur
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        setHasPermission(permission === 'granted')
-      })
-    } else if ('Notification' in window && Notification.permission === 'granted') {
-      setHasPermission(true)
+  const playNotificationSound = useCallback(() => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContextClass) return
+
+      const audioContext = new AudioContextClass()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.value = 800
+      oscillator.type = 'sine'
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.5)
+    } catch (error) {
+      console.warn('Audio notification non disponible')
     }
   }, [])
 
-  // Vérifier le statut de la commande
-  useEffect(() => {
-    if (!orderId) return
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }, [])
 
-    const checkOrderStatus = async () => {
-      try {
-        const response = await fetch(`/api/commandes/${orderId}`)
-        const { data } = await response.json()
+  const addNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => [notification, ...prev].slice(0, 5))
+    setTimeout(() => removeNotification(notification.id), 10000)
+  }, [removeNotification])
 
-        if (data && data.status !== lastStatus && lastStatus !== null) {
-          // Le statut a changé, créer une notification
-          const notification = createNotificationFromStatus(data.status, data.orderNumber)
-          addNotification(notification)
-
-          // Notification navigateur si autorisé
-          if (hasPermission) {
-            new Notification(notification.title, {
-              body: notification.message,
-              icon: '/favicon.ico',
-              badge: '/favicon.ico',
-            })
-          }
-
-          // Son de notification
-          playNotificationSound()
-        }
-
-        setLastStatus(data.status)
-      } catch (error) {
-        console.error('Erreur vérification statut:', error)
-      }
-    }
-
-    // Vérifier immédiatement
-    checkOrderStatus()
-
-    // Puis vérifier toutes les 15 secondes
-    const interval = setInterval(checkOrderStatus, 15000)
-
-    return () => clearInterval(interval)
-  }, [orderId, lastStatus, hasPermission])
-
-  const createNotificationFromStatus = (status: string, orderNumber: string): Notification => {
-    const notifications: Record<string, { type: 'success' | 'info' | 'warning'; title: string; message: string }> = {
+  const createNotificationFromStatus = useCallback((status: string, orderNumber: string): Notification => {
+    const notificationMap: Record<string, { type: 'success' | 'info' | 'warning'; title: string; message: string }> = {
       CONFIRMED: {
         type: 'success',
         title: '✓ Commande confirmée',
@@ -99,52 +87,74 @@ export default function NotificationSystem({ orderId }: NotificationSystemProps)
       CANCELLED: {
         type: 'warning',
         title: '⚠️ Commande annulée',
-        message: `Votre commande ${orderNumber} a été annulée. Contactez-nous pour plus d'informations.`,
+        message: `Votre commande ${orderNumber} a été annulée.`,
       },
     }
 
     return {
       id: Date.now().toString(),
       timestamp: Date.now(),
-      ...(notifications[status] || {
+      ...(notificationMap[status] || {
         type: 'info',
         title: 'Mise à jour',
         message: `Le statut de votre commande ${orderNumber} a été mis à jour.`,
       }),
     }
-  }
+  }, [])
 
-  const addNotification = (notification: Notification) => {
-    setNotifications(prev => [notification, ...prev].slice(0, 5)) // Garder max 5 notifications
+  // ✅ Demander permission uniquement au premier render
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          setHasPermission(true)
+        }
+      })
+    }
+  }, [])
 
-    // Retirer automatiquement après 10 secondes
-    setTimeout(() => {
-      removeNotification(notification.id)
-    }, 10000)
-  }
+  useEffect(() => {
+    if (!orderId) return
 
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id))
-  }
+    let mounted = true
 
-  const playNotificationSound = () => {
-    // Son simple de notification
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    const checkOrderStatus = async () => {
+      try {
+        const response = await fetch(`/api/commandes/${orderId}`)
+        const { data } = await response.json()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
+        if (!mounted) return
 
-    oscillator.frequency.value = 800
-    oscillator.type = 'sine'
+        if (data && data.status !== lastStatus && lastStatus !== null) {
+          const notification = createNotificationFromStatus(data.status, data.orderNumber)
+          addNotification(notification)
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+          if (hasPermission) {
+            new Notification(notification.title, {
+              body: notification.message,
+              icon: '/favicon.ico',
+            })
+          }
 
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.5)
-  }
+          playNotificationSound()
+        }
+
+        if (mounted) {
+          setLastStatus(data.status)
+        }
+      } catch (error) {
+        console.error('Erreur vérification statut:', error)
+      }
+    }
+
+    checkOrderStatus()
+    const interval = setInterval(checkOrderStatus, 15000)
+    
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
+  }, [orderId, lastStatus, hasPermission, createNotificationFromStatus, addNotification, playNotificationSound])
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -198,6 +208,7 @@ export default function NotificationSystem({ orderId }: NotificationSystemProps)
             <button
               onClick={() => removeNotification(notification.id)}
               className="flex-shrink-0 hover:opacity-70 transition"
+              aria-label="Fermer"
             >
               <X className="w-5 h-5" />
             </button>

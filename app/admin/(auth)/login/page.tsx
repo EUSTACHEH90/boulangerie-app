@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogIn } from 'lucide-react'
+import { Link, LogIn } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -127,12 +127,12 @@ export default function AdminLoginPage() {
 
         {/* Lien retour */}
         <div className="text-center">
-          <a
+          <Link
             href="/"
             className="text-sm text-amber-600 hover:text-amber-700 transition"
           >
             ← Retour au site
-          </a>
+          </Link>
         </div>
       </div>
     </div>

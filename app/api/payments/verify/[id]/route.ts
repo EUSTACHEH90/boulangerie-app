@@ -8,13 +8,17 @@ import { PaymentService } from '@/lib/payment/payment.service'
  * 
  * Vérifie le statut d'un paiement
  */
+interface RouteContext {
+  params: Promise<{ id: string }>  // ✅ Promise
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const result = await PaymentService.verifyPayment(params.id)
-
+    const { id } = await context.params
+    const result = await PaymentService.verifyPayment(id)
     return NextResponse.json({
       success: true,
       data: result,

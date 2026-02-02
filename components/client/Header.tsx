@@ -1,32 +1,32 @@
 // src/components/client/Header.tsx
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { useCartStore } from '@/lib/store/cartStore'
 import { ShoppingCart, Menu, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useCartStore } from '@/lib/store/cartStore'
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const totalItems = useCartStore((state) => state.getTotalItems())
+  
+  // ✅ Pas besoin de mounted state, Zustand gère l'hydratation
+  const [isClient, setIsClient] = useState(false)
 
-  // Attendre que le composant soit monté côté client
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // ✅ useLayoutEffect pour éviter l'avertissement
+  if (typeof window !== 'undefined' && !isClient) {
+    setIsClient(true)
+  }
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-amber-600">🥖 Ma Boulangerie</span>
+          <Link href="/" className="text-2xl font-bold text-amber-600 flex items-center gap-2">
+            🥖 Ma Boulangerie
           </Link>
 
-          {/* Navigation Desktop */}
-          <nav className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center gap-8">
             <Link href="/" className="text-gray-700 hover:text-amber-600 transition">
               Accueil
             </Link>
@@ -39,65 +39,67 @@ export default function Header() {
             <Link href="/contact" className="text-gray-700 hover:text-amber-600 transition">
               Contact
             </Link>
-          </nav>
+            <Link
+              href="/panier"
+              className="relative text-gray-700 hover:text-amber-600 transition"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {isClient && totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-amber-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+          </div>
 
-          {/* Panier */}
-          <Link
-            href="/panier"
-            className="relative p-2 text-gray-700 hover:text-amber-600 transition"
-          >
-            <ShoppingCart className="w-6 h-6" />
-            {/* Afficher le badge uniquement après le montage côté client */}
-            {mounted && totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </Link>
-
-          {/* Menu Mobile */}
           <button
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {isMenuOpen ? <X /> : <Menu />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Menu Mobile Dropdown */}
-        {isMenuOpen && (
-          <nav className="md:hidden py-4 space-y-2">
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 space-y-4">
             <Link
               href="/"
-              className="block px-4 py-2 text-gray-700 hover:bg-amber-50 rounded"
-              onClick={() => setIsMenuOpen(false)}
+              className="block text-gray-700 hover:text-amber-600 transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Accueil
             </Link>
             <Link
               href="/produits"
-              className="block px-4 py-2 text-gray-700 hover:bg-amber-50 rounded"
-              onClick={() => setIsMenuOpen(false)}
+              className="block text-gray-700 hover:text-amber-600 transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Nos Produits
             </Link>
             <Link
               href="/a-propos"
-              className="block px-4 py-2 text-gray-700 hover:bg-amber-50 rounded"
-              onClick={() => setIsMenuOpen(false)}
+              className="block text-gray-700 hover:text-amber-600 transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               À Propos
             </Link>
             <Link
               href="/contact"
-              className="block px-4 py-2 text-gray-700 hover:bg-amber-50 rounded"
-              onClick={() => setIsMenuOpen(false)}
+              className="block text-gray-700 hover:text-amber-600 transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Contact
             </Link>
-          </nav>
+            <Link
+              href="/panier"
+              className="block text-gray-700 hover:text-amber-600 transition"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Panier ({totalItems})
+            </Link>
+          </div>
         )}
-      </div>
+      </nav>
     </header>
   )
 }

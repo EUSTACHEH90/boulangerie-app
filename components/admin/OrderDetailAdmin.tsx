@@ -396,7 +396,7 @@ export default function OrderDetailAdmin({ order }: OrderDetailAdminProps) {
       >
         <p className="text-gray-700">
           Êtes-vous sûr de vouloir passer cette commande au statut{' '}
-          <span className="font-semibold text-gray-900">"{confirmModal.statusLabel}"</span> ?
+          <span className="font-semibold text-gray-900">&quot;{confirmModal.statusLabel}"</span> ?
         </p>
         {confirmModal.status === 'CANCELLED' && (
           <p className="text-sm text-red-600 mt-3">

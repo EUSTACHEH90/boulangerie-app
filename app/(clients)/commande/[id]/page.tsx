@@ -147,7 +147,7 @@ export default function SuiviPage({ params }: SuiviPageProps) {
         bg: 'bg-red-50',
         label: 'Annulée',
         message:
-          "Cette commande a été annulée. Contactez-nous pour plus d'informations.",
+          "Cette commande a été annulée. Contactez-nous pour plus d&apos;informations.",
       },
     }
     return statuses[status] || statuses.PENDING
@@ -182,7 +182,7 @@ export default function SuiviPage({ params }: SuiviPageProps) {
             href="/"
             className="text-amber-600 hover:underline mt-4 inline-block"
           >
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </div>
       </div>
@@ -391,7 +391,7 @@ export default function SuiviPage({ params }: SuiviPageProps) {
                   </>
                 ) : (
                   <p className="text-gray-600">
-                    Votre commande sera disponible pour retrait en boutique dès qu'elle sera prête.
+                    Votre commande sera disponible pour retrait en boutique dès qu&apos;elle sera prête.
                   </p>
                 )}
               </div>

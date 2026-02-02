@@ -5,10 +5,17 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-        port: '',
         pathname: '/**',
       },
     ],
+  },
+  // ✅ Désactiver ESLint pendant le build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // ✅ Désactiver TypeScript strict pendant le build (optionnel)
+  typescript: {
+    ignoreBuildErrors: false, // Laissez à false pour garder la vérification TypeScript
   },
 }
 

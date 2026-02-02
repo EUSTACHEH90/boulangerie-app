@@ -3,13 +3,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PaymentService } from '@/lib/payment/payment.service'
 
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
 /**
  * POST /api/payments/init
  * 
  * Initialise un paiement pour une commande
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    const { id } = await context.params
     const { orderId } = await request.json()
 
     if (!orderId) {

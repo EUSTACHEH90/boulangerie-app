@@ -43,7 +43,7 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Contactez-nous</h1>
           <p className="text-xl text-gray-600">
-            Une question ? Une suggestion ? N'hésitez pas à nous contacter
+            Une question ? Une suggestion ? N&apos;hésitez pas à nous contacter
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Adresse</h3>
                     <p className="text-gray-600">
-                      Secteur 15, Avenue Kwame N'Krumah<br />
+                      Secteur 15, Avenue Kwame N&apos;Krumah<br />
                       Ouagadougou, Burkina Faso
                     </p>
                   </div>

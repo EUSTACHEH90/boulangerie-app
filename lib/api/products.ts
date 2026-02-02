@@ -38,7 +38,7 @@ export interface CreateProductData {
   metaDescription?: string | null
 }
 
-export interface UpdateProductData extends Partial<CreateProductData> {}
+export type UpdateProductData = Partial<CreateProductData>
 
 /**
  * Récupère tous les produits
