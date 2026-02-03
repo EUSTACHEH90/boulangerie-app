@@ -1,4 +1,4 @@
-// src/app/(clients)/a-propos/page.tsx
+// app/(clients)/a-propos/page.tsx
 
 import Image from 'next/image'
 

@@ -1,4 +1,4 @@
-// src/app/(clients)/page.tsx
+// app/(clients)/page.tsx
 
 import Link from 'next/link'
 import { getProducts } from '@/lib/api/products'
