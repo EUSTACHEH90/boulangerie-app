@@ -1,4 +1,4 @@
-// src/app/(client)/commande/[id]/success/page.tsx
+// src/app/(clients)/commande/[id]/success/page.tsx
 
 import Link from 'next/link'
 import { CheckCircle, Package, Clock } from 'lucide-react'

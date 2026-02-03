@@ -1,4 +1,4 @@
-// src/app/(client)/commande/page.tsx
+// src/app/(clients)/commande/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'

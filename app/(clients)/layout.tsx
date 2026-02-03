@@ -1,4 +1,4 @@
-// src/app/(client)/layout.tsx
+// src/app/(clients)/layout.tsx
 
 import Header from '@/components/client/Header'
 import Footer from '@/components/client/Footer'

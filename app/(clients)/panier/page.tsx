@@ -1,4 +1,4 @@
-// src/app/(client)/panier/page.tsx
+// src/app/(clients)/panier/page.tsx
 'use client'
 
 import { useCartStore } from '@/lib/store/cartStore'
