@@ -1,8 +1,27 @@
-// src/lib/api/products.ts
+// lib/api/products.ts
 
-import { ProductCategory, ProductStatus } from '@prisma/client'
+import { ProductCategory, ProductStatus } from '@/types'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+// ✅ Fonction pour obtenir l'URL de base
+function getBaseUrl() {
+  // Côté client (navigateur)
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  
+  // Côté serveur sur Vercel
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  
+  // Variable d'environnement personnalisée
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+  
+  // Développement local
+  return 'http://localhost:3000'
+}
 
 export interface Product {
   id: string
@@ -59,9 +78,12 @@ export async function getProducts(params?: {
   if (params?.limit) queryParams.append('limit', String(params.limit))
   if (params?.search) queryParams.append('search', params.search)
 
-  const response = await fetch(`${API_URL}/api/produits?${queryParams}`, {
-    cache: 'no-store',
-  })
+  const baseUrl = getBaseUrl()
+  const queryString = queryParams.toString()
+const response = await fetch(
+  `${baseUrl}/api/produits${queryString ? `?${queryString}` : ''}`,
+  { cache: 'no-store' }
+)
 
   if (!response.ok) {
     throw new Error('Erreur lors de la récupération des produits')
@@ -74,7 +96,8 @@ export async function getProducts(params?: {
  * Récupère un produit par ID
  */
 export async function getProductById(id: string) {
-  const response = await fetch(`${API_URL}/api/produits/${id}`, {
+  const baseUrl = getBaseUrl()
+  const response = await fetch(`${baseUrl}/api/produits/${id}`, {
     cache: 'no-store',
   })
 
@@ -89,7 +112,8 @@ export async function getProductById(id: string) {
  * Crée un nouveau produit
  */
 export async function createProduct(data: CreateProductData, token: string) {
-  const response = await fetch(`${API_URL}/api/produits`, {
+  const baseUrl = getBaseUrl()
+  const response = await fetch(`${baseUrl}/api/produits`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -110,7 +134,8 @@ export async function createProduct(data: CreateProductData, token: string) {
  * Met à jour un produit
  */
 export async function updateProduct(id: string, data: UpdateProductData, token: string) {
-  const response = await fetch(`${API_URL}/api/produits/${id}`, {
+  const baseUrl = getBaseUrl()
+  const response = await fetch(`${baseUrl}/api/produits/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -131,7 +156,8 @@ export async function updateProduct(id: string, data: UpdateProductData, token: 
  * Supprime un produit
  */
 export async function deleteProduct(id: string, token: string) {
-  const response = await fetch(`${API_URL}/api/produits/${id}`, {
+  const baseUrl = getBaseUrl()
+  const response = await fetch(`${baseUrl}/api/produits/${id}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
