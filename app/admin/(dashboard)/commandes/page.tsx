@@ -1,4 +1,4 @@
-// src/app/admin/(dashboard)/commandes/page.tsx
+// app/admin/(dashboard)/commandes/page.tsx
 
 import { cookies } from 'next/headers'
 import OrdersTable from '@/components/admin/OrdersTable'
@@ -15,7 +15,7 @@ async function getOrders(): Promise<Order[]> {
       },
     })
 
-    return orders.map(order => ({
+    return orders.map((order: any) => ({
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
@@ -34,7 +34,7 @@ async function getOrders(): Promise<Order[]> {
       updatedAt: order.updatedAt.toISOString(),
       completedAt: order.completedAt ? order.completedAt.toISOString() : null,
       cancelledAt: order.cancelledAt ? order.cancelledAt.toISOString() : null,
-      items: order.items.map(item => ({
+      items: order.items.map((item: any) => ({
         id: item.id,
         orderId: item.orderId,
         productId: item.productId,
@@ -43,18 +43,19 @@ async function getOrders(): Promise<Order[]> {
         quantity: item.quantity,
         subtotal: Number(item.subtotal),
         createdAt: item.createdAt.toISOString(),
+        updatedAt: item.createdAt.toISOString(),
       })),
       payment: order.payment ? {
         id: order.payment.id,
         orderId: order.payment.orderId,
-        method: order.payment.method,
-        status: order.payment.status,
+        method: order.payment.method as any,
+        status: order.payment.status as any,
         amount: Number(order.payment.amount),
+        transactionId: order.payment.transactionId,
+        provider: order.payment.operator,
         phoneNumber: order.payment.phoneNumber,
         operator: order.payment.operator,
-        transactionId: order.payment.transactionId,
-        transactionRef: order.payment.transactionRef,
-        metadata: order.payment.metadata,
+        paymentUrl: null,
         failureReason: order.payment.failureReason,
         createdAt: order.payment.createdAt.toISOString(),
         updatedAt: order.payment.updatedAt.toISOString(),
