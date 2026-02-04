@@ -45,22 +45,29 @@ async function getOrders(): Promise<Order[]> {
         createdAt: item.createdAt.toISOString(),
         updatedAt: item.createdAt.toISOString(),
       })),
-      payment: order.payment ? {
-        id: order.payment.id,
-        orderId: order.payment.orderId,
-        method: order.payment.method as any,
-        status: order.payment.status as any,
-        amount: Number(order.payment.amount),
-        transactionId: order.payment.transactionId,
-        provider: order.payment.operator,
-        phoneNumber: order.payment.phoneNumber,
-        operator: order.payment.operator,
-        paymentUrl: null,
-        failureReason: order.payment.failureReason,
-        createdAt: order.payment.createdAt.toISOString(),
-        updatedAt: order.payment.updatedAt.toISOString(),
-        completedAt: order.payment.completedAt ? order.payment.completedAt.toISOString() : null,
-      } : null,
+      payment: order.payment
+  ? {
+      id: order.payment.id,
+      orderId: order.payment.orderId,
+      method: order.payment.method as any,
+      status: order.payment.status as any,
+      amount: Number(order.payment.amount),
+      transactionId: order.payment.transactionId,
+      transactionRef: order.payment.transactionRef ?? null,
+      provider: order.payment.operator,
+      phoneNumber: order.payment.phoneNumber,
+      operator: order.payment.operator,
+      paymentUrl: null,
+      failureReason: order.payment.failureReason,
+      metadata: order.payment.metadata ?? null,
+      createdAt: order.payment.createdAt.toISOString(),
+      updatedAt: order.payment.updatedAt.toISOString(),
+      completedAt: order.payment.completedAt
+        ? order.payment.completedAt.toISOString()
+        : null,
+    }
+  : null,
+
     }))
   } catch (error) {
     console.error('Erreur lors de la récupération des commandes:', error)
