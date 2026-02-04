@@ -1,12 +1,40 @@
 // app/(clients)/page.tsx
 
 import Link from 'next/link'
-import { getProducts } from '@/lib/api/products'
+
 import ProductCard from '@/components/client/ProductCard'
-import type { Product } from '@/types'
+import prisma from '@/lib/db'
 
 export default async function HomePage() {
-  const { data: products }: { data: Product[] } = await getProducts({ limit: 6 })
+  // ✅ Requête directe Prisma au lieu de fetch
+  const products = await prisma.product.findMany({
+    where: { 
+      isAvailable: true,
+      status: 'AVAILABLE'
+    },
+    take: 6,
+    orderBy: { createdAt: 'desc' },
+  })
+
+  // Convertir les données Prisma
+   const productsData = products.map((product: any) => ({ 
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    description: product.description,
+    category: product.category as any,
+    status: product.status as any,
+    price: Number(product.price),
+    image: product.image,
+    images: product.images as string[],
+    weight: product.weight,
+    isAvailable: product.isAvailable,
+    stock: product.stock,
+    metaTitle: product.metaTitle,
+    metaDescription: product.metaDescription,
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  }))
 
   return (
     <div>
@@ -34,7 +62,7 @@ export default async function HomePage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {productsData.map((product: any) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
