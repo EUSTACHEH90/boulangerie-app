@@ -1,5 +1,3 @@
-// src/app/(client)/layout.tsx
-
 import Header from '@/components/client/Header'
 import Footer from '@/components/client/Footer'
 

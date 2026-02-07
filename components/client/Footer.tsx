@@ -1,5 +1,5 @@
-// src/components/client/Footer.tsx
-
+// app/components/client/Footer.tsx
+'use client'
 import Link from 'next/link'
 
 export default function Footer() {

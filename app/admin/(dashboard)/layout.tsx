@@ -1,4 +1,4 @@
-// src/app/admin/layout.tsx
+//app/admin/layout.tsx
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

@@ -1,7 +1,6 @@
-// app/(clients)/page.tsx
+// app/page.tsx
 
 import Link from 'next/link'
-
 import ProductCard from '@/components/client/ProductCard'
 import prisma from '@/lib/db'
 
@@ -17,7 +16,7 @@ export default async function HomePage() {
   })
 
   // Convertir les données Prisma
-   const productsData = products.map((product: any) => ({ 
+  const productsData = products.map((product: any) => ({ 
     id: product.id,
     name: product.name,
     slug: product.slug,
@@ -37,11 +36,11 @@ export default async function HomePage() {
   }))
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-20">
+      <section className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-4">Bienvenue chez Ma Boulangerie</h1>
+          <h1 className="text-5xl font-bold mb-6">Bienvenue chez Ma Boulangerie</h1>
           <p className="text-xl mb-8">
             Pain frais et pâtisseries artisanales depuis 1990
           </p>
@@ -55,14 +54,14 @@ export default async function HomePage() {
       </section>
 
       {/* Produits populaires */}
-      <section className="py-16">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             Nos produits populaires
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {productsData.map((product: any) => (
+            {productsData.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -84,21 +83,21 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-5xl mb-4">🥖</div>
-              <h3 className="text-xl font-semibold mb-2">Produits frais</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Produits frais</h3>
               <p className="text-gray-600">
                 Pain et pâtisseries préparés chaque jour
               </p>
             </div>
             <div className="text-center">
               <div className="text-5xl mb-4">🚚</div>
-              <h3 className="text-xl font-semibold mb-2">Livraison rapide</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Livraison rapide</h3>
               <p className="text-gray-600">
                 Livraison à domicile dans toute la ville
               </p>
             </div>
             <div className="text-center">
               <div className="text-5xl mb-4">💳</div>
-              <h3 className="text-xl font-semibold mb-2">Paiement sécurisé</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Paiement sécurisé</h3>
               <p className="text-gray-600">
                 Mobile Money et paiement en espèces
               </p>
