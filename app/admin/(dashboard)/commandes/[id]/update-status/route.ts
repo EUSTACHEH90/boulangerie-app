@@ -1,9 +1,9 @@
-// src/app/admin/(dashboard)/commandes/[id]/update-status/route.ts
+//app/admin/(dashboard)/commandes/[id]/update-status/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import prisma from '@/lib/db'
-import { OrderStatus, PaymentStatus } from '@/types'
+import { OrderStatus, PaymentStatus } from '@/lib/enums'
 
 interface RouteContext {
   params: Promise<{ id: string }>

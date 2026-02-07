@@ -2,7 +2,7 @@
 'use server'
 
 import prisma from '@/lib/db'
-import { ProductCategory } from '@/types' // ✅ Import de l'enum
+import { ProductCategory } from '@/lib/enums' // ✅ Import de l'enum
 import { revalidatePath } from 'next/cache'
 
 export async function createProduct(data: FormData) {

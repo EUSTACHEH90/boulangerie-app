@@ -50,7 +50,7 @@ async function getOrder(id: string) {
         quantity: item.quantity,
         subtotal: Number(item.subtotal),
         createdAt: item.createdAt.toISOString(),
-        updatedAt: item.createdAt.toISOString(), // ✅ Ajouté
+        updatedAt: item.createdAt.toISOString(),
       })),
       payment: order.payment ? {
         id: order.payment.id,
@@ -59,10 +59,12 @@ async function getOrder(id: string) {
         status: order.payment.status as any,
         amount: Number(order.payment.amount),
         transactionId: order.payment.transactionId,
-        provider: order.payment.operator, // ✅ Ajouté
+        transactionRef: order.payment.transactionRef,
+        provider: order.payment.operator,
         phoneNumber: order.payment.phoneNumber,
         operator: order.payment.operator,
-        paymentUrl: null, // ✅ Ajouté
+        paymentUrl: null, 
+        metadata: order.payment.metadata,
         failureReason: order.payment.failureReason,
         createdAt: order.payment.createdAt.toISOString(),
         updatedAt: order.payment.updatedAt.toISOString(),
