@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
 
+export const dynamic = 'force-dynamic'
+
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>  // ✅ Promise
 }
