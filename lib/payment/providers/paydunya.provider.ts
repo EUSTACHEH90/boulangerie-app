@@ -6,7 +6,7 @@ import {
   InitPaymentResponse,
   VerifyPaymentResponse,
 } from './base.provider'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@/types'
 
 /**
  * Provider PayDunya pour paiements Mobile Money en Afrique de l'Ouest

@@ -1,7 +1,7 @@
 // src/lib/validations/order.ts
 
 import { z } from 'zod'
-import { OrderStatus, PaymentMethod } from '@prisma/client'
+import { OrderStatus, PaymentMethod }  from '@/lib/enums'
 
 /**
  * Schéma pour un item de commande

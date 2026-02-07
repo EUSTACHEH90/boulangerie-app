@@ -1,6 +1,6 @@
 // src/lib/payment/providers/base.provider.ts
 
-import { PaymentMethod, PaymentStatus } from '@prisma/client'
+import { PaymentMethod, PaymentStatus } from '@/types'
 
 /**
  * Réponse d'initialisation de paiement

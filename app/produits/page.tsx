@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { getProducts } from '@/lib/api/products'
 import ProductCard from '@/components/client/ProductCard'
-import { ProductCategory } from '@prisma/client'
+import { ProductCategory } from '@/types'
 import type { Product } from '@/types'
 import { Search } from 'lucide-react'
 

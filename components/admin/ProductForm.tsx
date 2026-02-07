@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ProductCategory, ProductStatus } from '@prisma/client'
+import type { ProductCategory, ProductStatus } from '@/types'
 import type { Product } from '@/types'
 import type { CreateProductData } from '@/lib/api/products'
 

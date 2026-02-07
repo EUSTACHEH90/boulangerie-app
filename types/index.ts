@@ -1,13 +1,23 @@
-// src/types/index.ts
+// types/index.ts
 
-import { 
-  ProductCategory, 
-  ProductStatus, 
-  OrderStatus, 
-  PaymentMethod, 
-  PaymentStatus 
-} from '@prisma/client'
+// ✅ Utiliser des enums au lieu de types
+export type ProductCategory = 'BOULANGERIE' | 'VIENNOISERIE' | 'PATISSERIE'
+export type ProductStatus = 'AVAILABLE' | 'OUT_OF_STOCK' | 'ARCHIVED' 
 
+export type OrderStatus = 
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'READY'
+  | 'COMPLETED'
+  | 'CANCELLED'
+
+
+export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
+
+export type PaymentMethod = 'CASH' | 'MOBILE_MONEY' | 'CARD'
+
+// Types pour les produits
 export interface Product {
   id: string
   name: string
@@ -27,22 +37,18 @@ export interface Product {
   updatedAt: string
 }
 
+// Types pour les commandes
 export interface OrderItem {
   id: string
   orderId: string
   productId: string
   productName: string
-  price: number
   quantity: number
+  price: number
   subtotal: number
+  product?: Product
   createdAt: string
-  product?: {
-    id: string
-    name: string
-    slug: string
-    category: ProductCategory
-    image: string | null
-  }
+  updatedAt: string
 }
 
 export interface Payment {
@@ -51,24 +57,26 @@ export interface Payment {
   method: PaymentMethod
   status: PaymentStatus
   amount: number
-  phoneNumber: string | null
-  operator: string | null
   transactionId: string | null
   transactionRef: string | null
+  provider: string | null
+  phoneNumber: string | null
+  operator: string | null
+  paymentUrl: string | null
   metadata: any
+  completedAt: string | null
   failureReason: string | null
   createdAt: string
   updatedAt: string
-  completedAt: string | null
 }
 
 export interface Order {
   id: string
   orderNumber: string
-  status: OrderStatus
   customerName: string
-  customerEmail: string | null
   customerPhone: string
+  customerEmail: string | null
+  status: OrderStatus
   subtotal: number
   deliveryFee: number
   total: number
@@ -77,37 +85,33 @@ export interface Order {
   deliveryTime: string | null
   notes: string | null
   adminNotes: string | null
-  createdAt: string
-  updatedAt: string
   completedAt: string | null
   cancelledAt: string | null
   items: OrderItem[]
   payment: Payment | null
-}
-
-export interface Admin {
-  id: string
-  email: string
-  firstName: string | null
-  lastName: string | null
-  role: 'ADMIN' | 'SUPER_ADMIN'
-  isActive: boolean
   createdAt: string
   updatedAt: string
-  lastLoginAt: string | null
 }
 
-export interface CartItem {
-  id: string
-  name: string
-  slug: string
-  price: number
-  quantity: number
-  image: string | null
-  category: string
-  weight?: number | null
+// Types pour les réponses API
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
 }
 
+export interface PaginatedResponse<T> {
+  data: T[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
+}
+
+// Types pour les formulaires
 export interface CreateProductData {
   name: string
   description?: string | null
@@ -123,4 +127,55 @@ export interface CreateProductData {
   metaDescription?: string | null
 }
 
-export interface UpdateProductData extends Partial<CreateProductData> {}
+export interface CreateOrderData {
+  customerName: string
+  customerPhone: string
+  customerEmail?: string
+  items: {
+    productId: string
+    quantity: number
+  }[]
+  isDelivery: boolean
+  deliveryAddress?: string
+  deliveryTime?: string
+  notes?: string
+  paymentMethod: PaymentMethod
+  phoneNumber?: string
+  operator?: string
+}
+
+export interface LoginData {
+  email: string
+  password: string
+}
+
+export interface AuthResponse {
+  token: string
+  admin: {
+    id: string
+    email: string
+    name: string
+  }
+}
+
+// Types pour le panier (store Zustand)
+export interface CartItem {
+  id: string
+  name: string
+  slug: string
+  price: number
+  quantity: number
+  image: string | null
+  category: ProductCategory
+  weight: number | null
+}
+
+export interface CartStore {
+  items: CartItem[]
+  addItem: (product: Product, quantity?: number) => void
+  removeItem: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => void
+  clearCart: () => void
+  getTotalItems: () => number
+  getTotalPrice: () => number
+}

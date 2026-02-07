@@ -1,8 +1,9 @@
 // src/lib/services/order.service.ts
 
 import prisma from '@/lib/db'
-import { Prisma, OrderStatus, PaymentStatus } from '@prisma/client'
+import { OrderStatus, PaymentStatus }  from '@/types'
 import type { CreateOrderInput, UpdateOrderStatusInput } from '@/lib/validations/order'
+import {  Prisma } from '@prisma/client'
 
 /**
  * Génère un numéro de commande unique
@@ -312,7 +313,7 @@ export class OrderService {
     const existingOrder = await this.getById(id)
 
     // Valider la transition de statut
-    this.validateStatusTransition(existingOrder.status, data.status)
+    this.validateStatusTransition(existingOrder.status , data.status)
 
     // Mettre à jour la commande
     const updateData: Prisma.OrderUpdateInput = {

@@ -1,8 +1,9 @@
 // src/lib/services/product.service.ts
 
 import prisma from '@/lib/db'
-import { Prisma, ProductCategory, ProductStatus } from '@prisma/client'
+import { ProductCategory, ProductStatus }  from '@/lib/enums'
 import type { CreateProductInput, UpdateProductInput } from '@/lib/validations/product'
+import { Prisma } from '@prisma/client'
 
 /**
  * Génère un slug unique à partir du nom du produit

@@ -6,7 +6,7 @@ import {
   InitPaymentResponse,
   VerifyPaymentResponse,
 } from './base.provider'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@/types'
 import crypto from 'crypto'
 
 /**

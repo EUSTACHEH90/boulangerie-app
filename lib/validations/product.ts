@@ -1,7 +1,7 @@
 // src/lib/validations/product.ts
 
 import { z } from 'zod'
-import { ProductCategory, ProductStatus } from '@prisma/client'
+import { ProductCategory, ProductStatus } from '@/lib/enums'
 
 /**
  * Schéma de validation pour la création d'un produit
@@ -29,7 +29,7 @@ export const createProductSchema = z.object({
   // ✅ Utiliser nativeEnum pour préserver le type
   category: z.nativeEnum(ProductCategory),
 
-  status: z.nativeEnum(ProductStatus).default('AVAILABLE'),
+  status: z.nativeEnum(ProductStatus).default(ProductStatus.AVAILABLE),
 
   price: z
     .number()

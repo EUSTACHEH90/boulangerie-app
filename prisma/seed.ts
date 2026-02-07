@@ -1,16 +1,15 @@
 // prisma/seed.ts
-import { PrismaClient, ProductCategory, ProductStatus, UserRole } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { ProductCategory, ProductStatus } from '@/lib/enums'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // 1. Nettoyage de sécurité
   console.log('🧹 Nettoyage de la base de données...')
   await prisma.orderItem.deleteMany({})
   await prisma.product.deleteMany({})
 
-  // 2. Création de l'Admin
   const hashedPassword = await bcrypt.hash('Admin@123', 10)
   await prisma.admin.upsert({
     where: { email: 'admin@bakery.com' },
@@ -20,11 +19,10 @@ async function main() {
       password: hashedPassword,
       firstName: 'John',
       lastName: 'Doe',
-      role: UserRole.SUPER_ADMIN,
+      role: 'SUPER_ADMIN', // ✅ String directe (Prisma accepte ça)
     },
   })
 
-  // 3. Liste des 11 produits avec liens vérifiés
   const products = [
     {
       name: 'Croissant au beurre',
@@ -137,7 +135,6 @@ async function main() {
       stock: 15,
     },
   ]
-
   for (const product of products) {
     await prisma.product.create({
       data: {

@@ -1,4 +1,4 @@
-// src/app/admin/(dashboard)/commandes/[id]/page.tsx
+// app/admin/(dashboard)/commandes/[id]/page.tsx
 
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -41,7 +41,7 @@ async function getOrder(id: string) {
       updatedAt: order.updatedAt.toISOString(),
       completedAt: order.completedAt ? order.completedAt.toISOString() : null,
       cancelledAt: order.cancelledAt ? order.cancelledAt.toISOString() : null,
-      items: order.items.map(item => ({
+      items: order.items.map((item: any) => ({
         id: item.id,
         orderId: item.orderId,
         productId: item.productId,
@@ -50,18 +50,19 @@ async function getOrder(id: string) {
         quantity: item.quantity,
         subtotal: Number(item.subtotal),
         createdAt: item.createdAt.toISOString(),
+        updatedAt: item.createdAt.toISOString(), // ✅ Ajouté
       })),
       payment: order.payment ? {
         id: order.payment.id,
         orderId: order.payment.orderId,
-        method: order.payment.method,
-        status: order.payment.status,
+        method: order.payment.method as any,
+        status: order.payment.status as any,
         amount: Number(order.payment.amount),
+        transactionId: order.payment.transactionId,
+        provider: order.payment.operator, // ✅ Ajouté
         phoneNumber: order.payment.phoneNumber,
         operator: order.payment.operator,
-        transactionId: order.payment.transactionId,
-        transactionRef: order.payment.transactionRef,
-        metadata: order.payment.metadata,
+        paymentUrl: null, // ✅ Ajouté
         failureReason: order.payment.failureReason,
         createdAt: order.payment.createdAt.toISOString(),
         updatedAt: order.payment.updatedAt.toISOString(),

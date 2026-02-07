@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import prisma from '@/lib/db'
-import { OrderStatus, PaymentStatus } from '@prisma/client'
+import { OrderStatus, PaymentStatus } from '@/types'
 
 interface RouteContext {
   params: Promise<{ id: string }>

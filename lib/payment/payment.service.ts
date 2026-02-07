@@ -1,10 +1,11 @@
 // src/lib/payment/payment.service.ts
 
 import prisma from '@/lib/db'
-import { PaymentMethod, PaymentStatus, Prisma } from '@prisma/client'
+import { PaymentMethod, PaymentStatus }  from '@/types'
 import { PaymentProvider, InitPaymentData } from './providers/base.provider'
 import { PaydunyaProvider } from './providers/paydunya.provider'
 import { FlutterwaveProvider } from './providers/flutterwave.provider'
+import {  Prisma } from '@prisma/client'
 
 /**
  * Factory pour créer le bon provider selon la méthode
