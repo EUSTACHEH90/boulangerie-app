@@ -6,30 +6,26 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
 
-export const dynamic = 'force-dynamic'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>  // ✅ Promise
 }
 
 async function getProductBySlug(slug: string) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/produits/slug/${slug}`,
-      { cache: 'no-store' }
-    )
+  const baseUrl = getBaseUrl()
 
-    if (!response.ok) {
-      return null
-    }
+  const response = await fetch(
+    `${baseUrl}/api/produits/slug/${slug}`,
+    { cache: 'no-store' }
+  )
 
-    const data = await response.json()
-    return data.data
-  } catch (error) {
-    console.error(error)
-    return null
-  }
+  if (!response.ok) return null
+
+  const data = await response.json()
+  return data.data
 }
+
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params  // ✅ Await params
