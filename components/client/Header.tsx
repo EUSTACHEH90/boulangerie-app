@@ -1,22 +1,20 @@
-// src/components/client/Header.tsx
+// components/client/Header.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCartStore } from '@/lib/store/cartStore'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const totalItems = useCartStore((state) => state.getTotalItems())
-  
-  // ✅ Pas besoin de mounted state, Zustand gère l'hydratation
   const [isClient, setIsClient] = useState(false)
+  const totalItems = useCartStore((state) => state.getTotalItems())
 
-  // ✅ useLayoutEffect pour éviter l'avertissement
-  if (typeof window !== 'undefined' && !isClient) {
+  // ✅ Utiliser useEffect pour éviter l'hydration mismatch
+  useEffect(() => {
     setIsClient(true)
-  }
+  }, [])
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -95,7 +93,7 @@ export default function Header() {
               className="block text-gray-700 hover:text-amber-600 transition"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Panier ({totalItems})
+              Panier {isClient && totalItems > 0 && `(${totalItems})`}
             </Link>
           </div>
         )}
