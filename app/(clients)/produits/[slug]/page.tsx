@@ -5,34 +5,42 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
-
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import prisma from '@/lib/db'
 
 interface ProductDetailPageProps {
-  params: Promise<{ slug: string }>  // ✅ Promise
+  params: Promise<{ slug: string }>
 }
-
-async function getProductBySlug(slug: string) {
-  const baseUrl = getBaseUrl()
-
-  const response = await fetch(
-    `${baseUrl}/api/produits/slug/${slug}`,
-    { cache: 'no-store' }
-  )
-
-  if (!response.ok) return null
-
-  const data = await response.json()
-  return data.data
-}
-
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { slug } = await params  // ✅ Await params
-  const product = await getProductBySlug(slug)
+  const { slug } = await params
+  
+  // ✅ Prisma direct (pas d'API)
+  const productData = await prisma.product.findUnique({
+    where: { slug },
+  })
 
-  if (!product) {
+  if (!productData) {
     notFound()
+  }
+
+  // Convertir en format attendu
+  const product = {
+    id: productData.id,
+    name: productData.name,
+    slug: productData.slug,
+    description: productData.description,
+    category: productData.category,
+    status: productData.status,
+    price: Number(productData.price),
+    image: productData.image,
+    images: productData.images as string[],
+    weight: productData.weight,
+    isAvailable: productData.isAvailable,
+    stock: productData.stock,
+    metaTitle: productData.metaTitle,           
+    metaDescription: productData.metaDescription,
+    createdAt: productData.createdAt.toISOString(), 
+    updatedAt: productData.updatedAt.toISOString(),
   }
 
   const formatPrice = (price: number) => {
