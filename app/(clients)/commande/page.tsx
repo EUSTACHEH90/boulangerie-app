@@ -24,24 +24,6 @@ export default function CommandePage() {
     operator: '',
   })
 
-  // Style pour les inputs avec visibilité garantie
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '12px 16px',
-    fontSize: '16px',
-    color: '#111827',
-    backgroundColor: '#ffffff',
-    border: '2px solid #d1d5db',
-    borderRadius: '8px',
-    outline: 'none',
-  }
-
-  const inputFocusStyle: React.CSSProperties = {
-    ...inputStyle,
-    borderColor: '#f59e0b',
-    boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.1)',
-  }
-
   useEffect(() => {
     if (items.length === 0) {
       router.push('/panier')
@@ -110,30 +92,32 @@ export default function CommandePage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem 0' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111827', marginBottom: '2rem' }}>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">
           Finaliser ma commande
         </h1>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            {/* Formulaire - 2/3 sur desktop, pleine largeur sur mobile */}
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              
               {/* Informations client */}
-              <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                   Vos informations
                 </h2>
 
                 {error && (
-                  <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#fee2e2', border: '1px solid #fca5a5', color: '#991b1b', borderRadius: '8px' }}>
+                  <div className="mb-4 p-3 sm:p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
                     {error}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nom complet *
                     </label>
                     <input
@@ -141,15 +125,13 @@ export default function CommandePage() {
                       required
                       value={formData.customerName}
                       onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                      style={inputStyle}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                       placeholder="Ex: Jean Dupont"
-                      onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                      onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Téléphone *
                     </label>
                     <input
@@ -157,80 +139,70 @@ export default function CommandePage() {
                       required
                       value={formData.customerPhone}
                       onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                      style={inputStyle}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                       placeholder="+226 70 12 34 56"
-                      onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                      onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email (optionnel)
                     </label>
                     <input
                       type="email"
                       value={formData.customerEmail}
                       onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
-                      style={inputStyle}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                       placeholder="email@example.com"
-                      onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                      onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Livraison */}
-              <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                   Mode de récupération
                 </h2>
 
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                  <label style={{ 
-                    flex: 1, 
-                    cursor: 'pointer',
-                    padding: '1rem',
-                    border: formData.isDelivery ? '2px solid #d1d5db' : '2px solid #f59e0b',
-                    backgroundColor: formData.isDelivery ? 'white' : '#fef3c7',
-                    borderRadius: '8px'
-                  }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
+                    !formData.isDelivery 
+                      ? 'border-amber-500 bg-amber-50' 
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}>
                     <input
                       type="radio"
                       name="delivery"
                       checked={!formData.isDelivery}
                       onChange={() => setFormData({ ...formData, isDelivery: false })}
-                      style={{ display: 'none' }}
+                      className="sr-only"
                     />
-                    <p style={{ fontWeight: 'bold', color: '#111827' }}>🏪 Retrait en boutique</p>
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '0.25rem' }}>Gratuit</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">🏪 Retrait en boutique</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Gratuit</p>
                   </label>
 
-                  <label style={{ 
-                    flex: 1, 
-                    cursor: 'pointer',
-                    padding: '1rem',
-                    border: formData.isDelivery ? '2px solid #f59e0b' : '2px solid #d1d5db',
-                    backgroundColor: formData.isDelivery ? '#fef3c7' : 'white',
-                    borderRadius: '8px'
-                  }}>
+                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
+                    formData.isDelivery 
+                      ? 'border-amber-500 bg-amber-50' 
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}>
                     <input
                       type="radio"
                       name="delivery"
                       checked={formData.isDelivery}
                       onChange={() => setFormData({ ...formData, isDelivery: true })}
-                      style={{ display: 'none' }}
+                      className="sr-only"
                     />
-                    <p style={{ fontWeight: 'bold', color: '#111827' }}>🚚 Livraison à domicile</p>
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '0.25rem' }}>2 000 FCFA</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">🚚 Livraison à domicile</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">2 000 FCFA</p>
                   </label>
                 </div>
 
                 {formData.isDelivery && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
                     <div>
-                      <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Adresse de livraison *
                       </label>
                       <textarea
@@ -238,104 +210,90 @@ export default function CommandePage() {
                         value={formData.deliveryAddress}
                         onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
                         rows={3}
-                        style={inputStyle}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base resize-none"
                         placeholder="Secteur, rue, indication..."
-                        onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                        onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Heure de livraison souhaitée
                       </label>
                       <input
                         type="datetime-local"
                         value={formData.deliveryTime}
                         onChange={(e) => setFormData({ ...formData, deliveryTime: e.target.value })}
-                        style={inputStyle}
-                        onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                        onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                       />
                     </div>
                   </div>
                 )}
 
-                <div style={{ marginTop: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Notes (optionnel)
                   </label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
-                    style={inputStyle}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base resize-none"
                     placeholder="Instructions particulières..."
-                    onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                    onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                   />
                 </div>
               </div>
 
               {/* Paiement */}
-              <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                   Mode de paiement
                 </h2>
 
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                  <label style={{ 
-                    flex: 1, 
-                    cursor: 'pointer',
-                    padding: '1rem',
-                    border: formData.paymentMethod === 'CASH' ? '2px solid #f59e0b' : '2px solid #d1d5db',
-                    backgroundColor: formData.paymentMethod === 'CASH' ? '#fef3c7' : 'white',
-                    borderRadius: '8px'
-                  }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
+                    formData.paymentMethod === 'CASH' 
+                      ? 'border-amber-500 bg-amber-50' 
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}>
                     <input
                       type="radio"
                       name="payment"
                       checked={formData.paymentMethod === 'CASH'}
                       onChange={() => setFormData({ ...formData, paymentMethod: 'CASH' })}
-                      style={{ display: 'none' }}
+                      className="sr-only"
                     />
-                    <p style={{ fontWeight: 'bold', color: '#111827' }}>💵 Espèces</p>
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '0.25rem' }}>À la livraison</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">💵 Espèces</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">À la livraison</p>
                   </label>
 
-                  <label style={{ 
-                    flex: 1, 
-                    cursor: 'pointer',
-                    padding: '1rem',
-                    border: formData.paymentMethod === 'MOBILE_MONEY' ? '2px solid #f59e0b' : '2px solid #d1d5db',
-                    backgroundColor: formData.paymentMethod === 'MOBILE_MONEY' ? '#fef3c7' : 'white',
-                    borderRadius: '8px'
-                  }}>
+                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
+                    formData.paymentMethod === 'MOBILE_MONEY' 
+                      ? 'border-amber-500 bg-amber-50' 
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}>
                     <input
                       type="radio"
                       name="payment"
                       checked={formData.paymentMethod === 'MOBILE_MONEY'}
                       onChange={() => setFormData({ ...formData, paymentMethod: 'MOBILE_MONEY' })}
-                      style={{ display: 'none' }}
+                      className="sr-only"
                     />
-                    <p style={{ fontWeight: 'bold', color: '#111827' }}>📱 Mobile Money</p>
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '0.25rem' }}>Orange, Moov, MTN</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">📱 Mobile Money</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Orange, Moov, MTN</p>
                   </label>
                 </div>
 
                 {formData.paymentMethod === 'MOBILE_MONEY' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
                     <div>
-                      <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Opérateur *
                       </label>
                       <select
                         required
                         value={formData.operator}
                         onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
-                        style={inputStyle}
-                        onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                        onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                       >
                         <option value="">Choisir un opérateur</option>
                         <option value="Orange">Orange Money</option>
@@ -345,7 +303,7 @@ export default function CommandePage() {
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Numéro Mobile Money *
                       </label>
                       <input
@@ -353,72 +311,82 @@ export default function CommandePage() {
                         required={formData.paymentMethod === 'MOBILE_MONEY'}
                         value={formData.phoneNumber}
                         onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        style={inputStyle}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
                         placeholder="+226 70 12 34 56"
-                        onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                        onBlur={(e) => Object.assign(e.target.style, inputStyle)}
                       />
                     </div>
                   </div>
                 )}
               </div>
+
+              {/* Bouton mobile (visible seulement sur mobile, en bas du formulaire) */}
+              <div className="lg:hidden">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 sm:py-4 rounded-lg font-bold text-white transition text-sm sm:text-base ${
+                    isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-amber-600 hover:bg-amber-700'
+                  }`}
+                >
+                  {isSubmitting ? 'Traitement...' : `Confirmer • ${formatPrice(total)}`}
+                </button>
+                <p className="text-xs text-gray-600 text-center mt-3">
+                  En confirmant, vous acceptez nos conditions de vente
+                </p>
+              </div>
             </div>
 
-            {/* Récapitulatif */}
-            <div>
-              <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem', position: 'sticky', top: '1rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>
+            {/* Récapitulatif - 1/3 sur desktop, sticky */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                   Récapitulatif
                 </h2>
 
-                <div style={{ marginBottom: '1rem' }}>
+                <div className="space-y-2 mb-4">
                   {items.map((item) => (
-                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '0.5rem' }}>
-                      <span style={{ color: '#6b7280' }}>
+                    <div key={item.id} className="flex justify-between text-xs sm:text-sm">
+                      <span className="text-gray-600">
                         {item.quantity}x {item.name}
                       </span>
-                      <span style={{ fontWeight: 'bold', color: '#111827' }}>
+                      <span className="font-bold text-gray-900">
                         {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6b7280', marginBottom: '0.5rem' }}>
+                <div className="border-t border-gray-200 pt-3 sm:pt-4 space-y-2">
+                  <div className="flex justify-between text-sm text-gray-600">
                     <span>Sous-total</span>
                     <span>{formatPrice(getTotalPrice())}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  <div className="flex justify-between text-sm text-gray-600">
                     <span>Livraison</span>
                     <span>{formatPrice(deliveryFee)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 'bold', borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem' }}>
-                    <span style={{ color: '#111827' }}>Total</span>
-                    <span style={{ color: '#f59e0b' }}>{formatPrice(total)}</span>
+                  <div className="flex justify-between text-base sm:text-lg font-bold border-t border-gray-200 pt-2 sm:pt-3">
+                    <span className="text-gray-900">Total</span>
+                    <span className="text-amber-600">{formatPrice(total)}</span>
                   </div>
                 </div>
 
+                {/* Bouton desktop (caché sur mobile) */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  style={{
-                    width: '100%',
-                    marginTop: '1.5rem',
-                    backgroundColor: isSubmitting ? '#9ca3af' : '#f59e0b',
-                    color: 'white',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    border: 'none',
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    fontSize: '16px'
-                  }}
+                  className={`hidden lg:block w-full mt-6 py-3 rounded-lg font-bold text-white transition ${
+                    isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-amber-600 hover:bg-amber-700'
+                  }`}
                 >
                   {isSubmitting ? 'Traitement...' : 'Confirmer la commande'}
                 </button>
 
-                <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', marginTop: '1rem' }}>
+                <p className="hidden lg:block text-xs text-gray-600 text-center mt-3">
                   En confirmant, vous acceptez nos conditions de vente
                 </p>
               </div>
