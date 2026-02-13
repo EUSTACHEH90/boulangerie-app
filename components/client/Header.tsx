@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X } from 'lucide-react'
+import { ShoppingCart, Menu, X, Package} from 'lucide-react'
 import { useCartStore } from '@/lib/store/cartStore'
+
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -36,6 +37,10 @@ export default function Header() {
             </Link>
             <Link href="/contact" className="text-gray-700 hover:text-amber-600 transition">
               Contact
+            </Link>
+            <Link href="/mes-commandes" className="flex items-center gap-1.5 text-gray-700 hover:text-amber-600 transition text-sm lg:text-base font-medium">
+              <Package className="w-4 h-4" />
+                Mes commandes
             </Link>
             <Link
               href="/panier"
@@ -88,6 +93,15 @@ export default function Header() {
             >
               Contact
             </Link>
+            <Link
+              href="/mes-commandes"
+              className="flex items-center gap-2 text-gray-700 hover:text-amber-600 transition py-1"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Package className="w-4 h-4" />
+              Mes commandes
+            </Link>
+
             <Link
               href="/panier"
               className="block text-gray-700 hover:text-amber-600 transition"

@@ -312,7 +312,7 @@ export default function CommandePage() {
                         value={formData.phoneNumber}
                         onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                        placeholder="+226 70 12 34 56"
+                        placeholder="+226 56 37 96 23"
                       />
                     </div>
                   </div>
