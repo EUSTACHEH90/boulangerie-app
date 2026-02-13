@@ -42,8 +42,8 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4">Contact</h3>
             <ul className="space-y-2 text-gray-400">
               <li>📍 Ouagadougou, Burkina Faso</li>
-              <li>📞 +226 70 12 34 56</li>
-              <li>✉️ contact@maboulangerie.com</li>
+              <li>📞 +226 56 37 96 23</li>
+              <li>✉️ eusticrush119@gmail.com</li>
               <li>🕐 Lun-Sam: 6h-20h</li>
             </ul>
           </div>
