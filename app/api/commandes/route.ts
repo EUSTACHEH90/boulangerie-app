@@ -5,6 +5,7 @@ import { OrderService } from '@/lib/services/order.service'
 import { createOrderSchema, getOrdersQuerySchema } from '@/lib/validations/order'
 import { requireAuth } from '@/lib/auth-middleware'
 import { ZodError } from 'zod'
+import { sendOrderConfirmationSMS } from '@/lib/services/sms.service'
 
 /**
  * GET /api/commandes
@@ -116,6 +117,13 @@ export async function POST(request: NextRequest) {
 
     // Créer la commande
     const order = await OrderService.create(validatedData)
+
+    //Envoyer SMS (sans bloquer la réponse)
+    sendOrderConfirmationSMS(
+      order.customerPhone,
+      order.customerName,
+      order.orderNumber
+    )
 
     return NextResponse.json(
       {
