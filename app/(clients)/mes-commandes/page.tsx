@@ -1,398 +1,278 @@
-// app/(clients)/commande/page.tsx
+// app/(clients)/mes-commandes/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useCartStore } from '@/lib/store/cartStore'
+import { useState } from 'react'
+import Link from 'next/link'
+import { Search, Package, ChevronRight, Lock } from 'lucide-react'
 
-export default function CommandePage() {
-  const router = useRouter()
-  const { items, getTotalPrice, getTotalItems, clearCart } = useCartStore()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
+  PENDING:   { label: 'En attente',     color: 'bg-yellow-100 text-yellow-800', icon: '📋' },
+  CONFIRMED: { label: 'Confirmée',      color: 'bg-blue-100 text-blue-800',     icon: '✅' },
+  PREPARING: { label: 'En préparation', color: 'bg-orange-100 text-orange-800', icon: '👨‍🍳' },
+  READY:     { label: 'Prête',          color: 'bg-green-100 text-green-800',   icon: '🎉' },
+  COMPLETED: { label: 'Livrée',         color: 'bg-gray-100 text-gray-800',     icon: '🥖' },
+  CANCELLED: { label: 'Annulée',        color: 'bg-red-100 text-red-800',       icon: '❌' },
+}
+
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  total: number
+  isDelivery: boolean
+  createdAt: string
+  items: { productName: string; quantity: number }[]
+}
+
+export default function MesCommandesPage() {
+  const [phone, setPhone] = useState('')
+  const [orderNumber, setOrderNumber] = useState('')
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
+  const [attempts, setAttempts] = useState(0)
+  const [blocked, setBlocked] = useState(false)
 
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerPhone: '',
-    customerEmail: '',
-    isDelivery: false,
-    deliveryAddress: '',
-    deliveryTime: '',
-    notes: '',
-    paymentMethod: 'CASH' as 'CASH' | 'MOBILE_MONEY',
-    phoneNumber: '',
-    operator: '',
-  })
+  const MAX_ATTEMPTS = 5
 
-  useEffect(() => {
-    if (items.length === 0) {
-      router.push('/panier')
-    }
-  }, [items, router])
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
       minimumFractionDigits: 0,
     }).format(price)
-  }
 
-  const deliveryFee = formData.isDelivery ? 2000 : 0
-  const total = getTotalPrice() + deliveryFee
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (blocked || !phone.trim() || !orderNumber.trim()) return
+
+    setLoading(true)
     setError('')
-    setIsSubmitting(true)
+    setSearched(false)
+    setOrder(null)
 
     try {
-      const orderData = {
-        customerName: formData.customerName,
-        customerPhone: formData.customerPhone,
-        customerEmail: formData.customerEmail || undefined,
-        items: items.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-        })),
-        isDelivery: formData.isDelivery,
-        deliveryAddress: formData.isDelivery ? formData.deliveryAddress : undefined,
-        deliveryTime: formData.deliveryTime || undefined,
-        notes: formData.notes || undefined,
-        paymentMethod: formData.paymentMethod,
-        phoneNumber: formData.paymentMethod === 'MOBILE_MONEY' ? formData.phoneNumber : undefined,
-        operator: formData.paymentMethod === 'MOBILE_MONEY' ? formData.operator : undefined,
+      const response = await fetch(
+        `/api/commandes/verify?phone=${encodeURIComponent(phone.trim())}&orderNumber=${encodeURIComponent(orderNumber.trim().toUpperCase())}`
+      )
+
+      if (response.status === 429) {
+        setBlocked(true)
+        setError('Trop de tentatives. Réessayez dans 10 minutes.')
+        return
       }
 
-      const response = await fetch('/api/commandes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      })
+      if (response.status === 404) {
+        const newAttempts = attempts + 1
+        setAttempts(newAttempts)
+
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setBlocked(true)
+          setError('Trop de tentatives. Réessayez dans 10 minutes.')
+          setTimeout(() => {
+            setBlocked(false)
+            setAttempts(0)
+          }, 10 * 60 * 1000)
+        } else {
+          setError(
+            `Téléphone ou numéro de commande incorrect. (${newAttempts}/${MAX_ATTEMPTS} tentatives)`
+          )
+        }
+        setSearched(true)
+        return
+      }
+
+      if (!response.ok) throw new Error('Erreur serveur')
 
       const data = await response.json()
+      setOrder(data.data)
+      setSearched(true)
+      setAttempts(0)
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la commande')
-      }
-
-      clearCart()
-      router.push(`/commande/${data.data.id}/success`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+    } catch {
+      setError('Une erreur est survenue. Veuillez réessayer.')
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
-  }
-
-  if (items.length === 0) {
-    return null
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">
-          Finaliser ma commande
-        </h1>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {/* Formulaire - 2/3 sur desktop, pleine largeur sur mobile */}
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              
-              {/* Informations client */}
-              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-                  Vos informations
-                </h2>
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-amber-600" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Suivre ma commande
+          </h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
+            Entrez les informations reçues par WhatsApp/SMS
+          </p>
+        </div>
 
-                {error && (
-                  <div className="mb-4 p-3 sm:p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
+        {/* Formulaire */}
+        <form onSubmit={handleSearch} className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
 
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nom complet *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.customerName}
-                      onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                      placeholder="Ex: Jean Dupont"
-                    />
-                  </div>
+          {/* Info sécurité */}
+          <div className="flex items-center gap-2 mb-5 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+            <Lock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <span>
+              Vos informations sont utilisées uniquement pour accéder à votre commande
+            </span>
+          </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Téléphone *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.customerPhone}
-                      onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                      placeholder="+226 70 12 34 56"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email (optionnel)
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.customerEmail}
-                      onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                      placeholder="email@example.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Livraison */}
-              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-                  Mode de récupération
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
-                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
-                    !formData.isDelivery 
-                      ? 'border-amber-500 bg-amber-50' 
-                      : 'border-gray-300 bg-white hover:border-gray-400'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="delivery"
-                      checked={!formData.isDelivery}
-                      onChange={() => setFormData({ ...formData, isDelivery: false })}
-                      className="sr-only"
-                    />
-                    <p className="font-bold text-gray-900 text-sm sm:text-base">🏪 Retrait en boutique</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Gratuit</p>
-                  </label>
-
-                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
-                    formData.isDelivery 
-                      ? 'border-amber-500 bg-amber-50' 
-                      : 'border-gray-300 bg-white hover:border-gray-400'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="delivery"
-                      checked={formData.isDelivery}
-                      onChange={() => setFormData({ ...formData, isDelivery: true })}
-                      className="sr-only"
-                    />
-                    <p className="font-bold text-gray-900 text-sm sm:text-base">🚚 Livraison à domicile</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">2 000 FCFA</p>
-                  </label>
-                </div>
-
-                {formData.isDelivery && (
-                  <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Adresse de livraison *
-                      </label>
-                      <textarea
-                        required={formData.isDelivery}
-                        value={formData.deliveryAddress}
-                        onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                        rows={3}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base resize-none"
-                        placeholder="Secteur, rue, indication..."
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Heure de livraison souhaitée
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={formData.deliveryTime}
-                        onChange={(e) => setFormData({ ...formData, deliveryTime: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notes (optionnel)
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base resize-none"
-                    placeholder="Instructions particulières..."
-                  />
-                </div>
-              </div>
-
-              {/* Paiement */}
-              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-                  Mode de paiement
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
-                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
-                    formData.paymentMethod === 'CASH' 
-                      ? 'border-amber-500 bg-amber-50' 
-                      : 'border-gray-300 bg-white hover:border-gray-400'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={formData.paymentMethod === 'CASH'}
-                      onChange={() => setFormData({ ...formData, paymentMethod: 'CASH' })}
-                      className="sr-only"
-                    />
-                    <p className="font-bold text-gray-900 text-sm sm:text-base">💵 Espèces</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">À la livraison</p>
-                  </label>
-
-                  <label className={`cursor-pointer p-3 sm:p-4 border-2 rounded-lg transition ${
-                    formData.paymentMethod === 'MOBILE_MONEY' 
-                      ? 'border-amber-500 bg-amber-50' 
-                      : 'border-gray-300 bg-white hover:border-gray-400'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={formData.paymentMethod === 'MOBILE_MONEY'}
-                      onChange={() => setFormData({ ...formData, paymentMethod: 'MOBILE_MONEY' })}
-                      className="sr-only"
-                    />
-                    <p className="font-bold text-gray-900 text-sm sm:text-base">📱 Mobile Money</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Orange, Moov, MTN</p>
-                  </label>
-                </div>
-
-                {formData.paymentMethod === 'MOBILE_MONEY' && (
-                  <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Opérateur *
-                      </label>
-                      <select
-                        required
-                        value={formData.operator}
-                        onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                      >
-                        <option value="">Choisir un opérateur</option>
-                        <option value="Orange">Orange Money</option>
-                        <option value="Moov">Moov Money</option>
-                        <option value="MTN">MTN Mobile Money</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Numéro Mobile Money *
-                      </label>
-                      <input
-                        type="tel"
-                        required={formData.paymentMethod === 'MOBILE_MONEY'}
-                        value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-sm sm:text-base"
-                        placeholder="+226 56 37 96 23"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bouton mobile (visible seulement sur mobile, en bas du formulaire) */}
-              <div className="lg:hidden">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full py-3 sm:py-4 rounded-lg font-bold text-white transition text-sm sm:text-base ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-amber-600 hover:bg-amber-700'
-                  }`}
-                >
-                  {isSubmitting ? 'Traitement...' : `Confirmer • ${formatPrice(total)}`}
-                </button>
-                <p className="text-xs text-gray-600 text-center mt-3">
-                  En confirmant, vous acceptez nos conditions de vente
-                </p>
-              </div>
+          <div className="space-y-4">
+            {/* Téléphone */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Numéro de téléphone utilisé lors de la commande *
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+226 70 12 34 56"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-gray-900 bg-white text-sm sm:text-base"
+                required
+                disabled={blocked}
+              />
             </div>
 
-            {/* Récapitulatif - 1/3 sur desktop, sticky */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-4">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-                  Récapitulatif
-                </h2>
-
-                <div className="space-y-2 mb-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-xs sm:text-sm">
-                      <span className="text-gray-600">
-                        {item.quantity}x {item.name}
-                      </span>
-                      <span className="font-bold text-gray-900">
-                        {formatPrice(item.price * item.quantity)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t border-gray-200 pt-3 sm:pt-4 space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Sous-total</span>
-                    <span>{formatPrice(getTotalPrice())}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Livraison</span>
-                    <span>{formatPrice(deliveryFee)}</span>
-                  </div>
-                  <div className="flex justify-between text-base sm:text-lg font-bold border-t border-gray-200 pt-2 sm:pt-3">
-                    <span className="text-gray-900">Total</span>
-                    <span className="text-amber-600">{formatPrice(total)}</span>
-                  </div>
-                </div>
-
-                {/* Bouton desktop (caché sur mobile) */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`hidden lg:block w-full mt-6 py-3 rounded-lg font-bold text-white transition ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-amber-600 hover:bg-amber-700'
-                  }`}
-                >
-                  {isSubmitting ? 'Traitement...' : 'Confirmer la commande'}
-                </button>
-
-                <p className="hidden lg:block text-xs text-gray-600 text-center mt-3">
-                  En confirmant, vous acceptez nos conditions de vente
-                </p>
-              </div>
+            {/* Numéro de commande */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Numéro de commande reçu par message *
+              </label>
+              <input
+                type="text"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value.toUpperCase())}
+                placeholder="CMD-XXXXXXXX"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition text-gray-900 bg-white text-sm sm:text-base uppercase tracking-wider"
+                required
+                disabled={blocked}
+              />
+              <p className="text-xs text-gray-500 mt-1.5">
+                💡 Reçu par WhatsApp/SMS après votre commande
+              </p>
             </div>
           </div>
+
+          {/* Erreur */}
+          {error && (
+            <div className={`mt-4 p-3 rounded-lg text-sm flex items-start gap-2 ${
+              blocked
+                ? 'bg-red-50 border border-red-200 text-red-700'
+                : 'bg-orange-50 border border-orange-200 text-orange-700'
+            }`}>
+              <span className="flex-shrink-0">{blocked ? '🔒' : '⚠️'}</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Bouton */}
+          <button
+            type="submit"
+            disabled={loading || blocked}
+            className="w-full mt-5 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Recherche en cours...
+              </>
+            ) : (
+              <>
+                <Search className="w-5 h-5" />
+                Voir ma commande
+              </>
+            )}
+          </button>
         </form>
+
+        {/* Résultat */}
+        {searched && order && (
+          <div className="space-y-3">
+            <p className="text-sm text-green-600 font-medium px-1">
+              ✅ Commande trouvée !
+            </p>
+
+            <Link
+              href={`/commande/${order.id}`}
+              className="block bg-white rounded-xl shadow-md p-4 sm:p-5 hover:shadow-lg transition group border-2 border-amber-200"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="font-bold text-gray-900 text-base sm:text-lg">
+                    {order.orderNumber}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {new Date(order.createdAt).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const statusInfo = STATUS_LABELS[order.status] || STATUS_LABELS.PENDING
+                    return (
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusInfo.color}`}>
+                        {statusInfo.icon} {statusInfo.label}
+                      </span>
+                    )
+                  })()}
+                  <ChevronRight className="w-5 h-5 text-amber-600 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
+              <div className="space-y-1 mb-3">
+                {order.items.slice(0, 3).map((item, index) => (
+                  <p key={index} className="text-sm text-gray-600">
+                    {item.quantity}x {item.productName}
+                  </p>
+                ))}
+                {order.items.length > 3 && (
+                  <p className="text-xs text-gray-400">
+                    +{order.items.length - 3} autre(s) article(s)
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <span className="text-xs text-gray-500">
+                  {order.isDelivery ? '🚚 Livraison' : '🏪 Retrait en boutique'}
+                </span>
+                <span className="font-bold text-amber-600">
+                  {formatPrice(order.total)}
+                </span>
+              </div>
+
+              <div className="mt-3 text-center">
+                <span className="text-xs text-amber-600 font-medium">
+                  👆 Cliquez pour voir la progression détaillée
+                </span>
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* Aide */}
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
+          <p className="font-medium mb-1">📱 Vous n'avez pas reçu de message ?</p>
+          <p className="text-xs">
+            Vérifiez votre WhatsApp ou SMS. Si vous n'avez rien reçu,{' '}
+            <a href="tel:+22670123456" className="underline font-medium">
+              appelez-nous
+            </a>.
+          </p>
+        </div>
+
       </div>
     </div>
   )
