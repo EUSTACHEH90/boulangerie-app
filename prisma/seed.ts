@@ -130,7 +130,7 @@ async function main() {
       description: 'Coffret de 6 macarons artisanaux (Vanille, Chocolat, Pistache)',
       category: ProductCategory.PATISSERIE,
       price: 5000,
-      image: 'https://images.unsplash.com/photo-1569864358642-9d16197022c9?q=80&w=500',
+      image: 'http://cocoaandfig.com/cdn/shop/products/French_Macaron_Assortment_Box_1200x1200.jpg?v=1579114184',
       weight: 150,
       stock: 15,
     },

@@ -7,6 +7,17 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cocoaandfig.com',
+        pathname: '/**',
+      },
+      {
+        // Ajout du protocole http car ton erreur précédente le mentionnait
+        protocol: 'http',
+        hostname: 'cocoaandfig.com',
+        pathname: '/**',
+      },
     ],
   },
 }
